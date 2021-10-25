@@ -38,7 +38,7 @@ class Bugge:
     def add_route(self, handler, route, method):
         # Keyed by a concatenation of method and url
         # Only saves the handler function, not the context
-        route_key = method + ":" + route + handler.__name__
+        route_key = method + ":" + route
         self.routes[route_key] = handler
 
     def read_request(self):
@@ -52,6 +52,12 @@ class Bugge:
         else:
             self.respond_error("HTML", 404) # Return a 404 not found in html format
 
+    # Reads request paramters with read request, reads payload if the request is POST.
+    # Uses the aquired input to handle the request and call the correct response.
+    # Not sure what cases this will be able to cover, but a lot of cases should be possible to automate
+    def read_and_handle_request(self):
+        pass
+            
     def extract_url_params(self):
         pass
 
