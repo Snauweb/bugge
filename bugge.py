@@ -1,11 +1,11 @@
 class DB_wrap:
     def __init__(self):
         pass
-
-
+    
 class Bugge:
     def __init__(self):
         self.config_dict = {}
+        self.routes = {}
     
     def read_config(self, url):
         config_file_handle = open(url, 'r')
@@ -28,25 +28,54 @@ class Bugge:
     def read_environment(self):
         pass
 
-    def add_route(self, route, method, function):
-        pass
+    ### Requests and routing
+    # Decorator used to add route, to create a pattern resembeling flask
+    def route(self, route, method):
+        def decorator(route_handler):
+            self.add_route(route_handler, route, method)
+        return decorator
+    
+    def add_route(self, handler, route, method):
+        # Keyed by a concatenation of method and url
+        # Only saves the handler function, not the context
+        route_key = method + ":" + route + handler.__name__
+        self.routes[route_key] = handler
 
-    def route(self, url, method):
+    def read_request(self):
         pass
+        
+    def handle_request(self, route, method):
+        route_key = method + ":" + route
+
+        if route_key in self.routes:
+            self.routes[route_key](); # Execute handler function
+        else:
+            self.respond_error("HTML", 404) # Return a 404 not found in html format
 
     def extract_url_params(self):
         pass
 
+    ### DB methods
     def read_table(self, table_name):
         pass
 
     def add_to_table(self, table_name, *cols):
         pass
 
-    def respond_HTML(self):
-        pass
+    ### Response handlers
+    def respond_HTML(self, body, status=200):
+        header = \
+        "Content-type: text/html" + \
+        "Status: " + str(status) + "\n\n"
+            
+        response = header + body
+        print(response)
 
     def respond_JSON(self):
         pass
+
+    def respond_error(self, type, error_code):
+        if(type == "HTML"):
+            self.respond_HTML("<h1>Error " + str(error_code) + "</h1>", status=404)
 
     
