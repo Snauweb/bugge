@@ -78,7 +78,13 @@ class Bugge:
         print(response)
 
     def respond_JSON(self):
-        pass
+        header = \
+        "Content-type: text/json" + \
+        "Status: " + str(status) + "\n\n"
+            
+        response = header + body
+        print(response)
+
 
     def respond_error(self, type, error_code):
         if(type == "HTML"):
