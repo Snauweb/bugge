@@ -1,3 +1,5 @@
+import json
+
 class DB_wrap:
     def __init__(self):
         pass
@@ -34,7 +36,8 @@ class Bugge:
         def decorator(route_handler):
             self.add_route(route_handler, route, method)
         return decorator
-    
+
+    # Internal route adder. The decorator wraps this method
     def add_route(self, handler, route, method):
         # Keyed by a concatenation of method and url
         # Only saves the handler function, not the context
@@ -77,11 +80,34 @@ class Bugge:
         response = header + body
         print(response)
 
-    def respond_JSON(self):
-        pass
+    # Only accepts strings and dicts as body for now
+    def respond_JSON(self, body, status=200):
+        # Comparision with the class objects of string and dictionary.
+        # Seems to work fine, as the class objects should be unique?
+        if(type(body) == str):
+            pass
+
+        elif(type(body) == dict):
+            body = json.dumps(body)
+
+        else:
+            respond_error("JSON", 500)
+            return
+
+        header = \
+        "Content-type: text/json" + \
+        "Status: " + str(status) + "\n\n"
+
+        response = header + body
+        print(response)
+
+        
 
     def respond_error(self, type, error_code):
         if(type == "HTML"):
-            self.respond_HTML("<h1>Error " + str(error_code) + "</h1>", status=404)
+            self.respond_HTML("<h1>Error " + str(error_code) + "</h1>", status=error_code)
+
+        if(type == "JSON"):
+            self.respond_JSON({"http-error": error_code}, status=error_code)
 
     
