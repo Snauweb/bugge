@@ -101,7 +101,6 @@ class Bugge:
         response = header + body
         print(response)
 
-        
 
     def respond_error(self, type, error_code):
         if(type == "HTML"):
