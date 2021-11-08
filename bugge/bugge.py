@@ -219,5 +219,3 @@ class Bugge:
 
         if(type == "JSON"):
             self.respond_JSON({"http-error": error_code}, status=error_code)
-
-    

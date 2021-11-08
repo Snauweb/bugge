@@ -1,6 +1,6 @@
 import sys
 
-CONFIG_FILE_URL = "../configMysql.txt"
+CONFIG_FILE_URL = "../../configs/config_pg_test.txt"
 LIB_DIR = "./bugge"
 
 sys.path.append(LIB_DIR)
@@ -24,14 +24,28 @@ def setup_routes(app):
     def show_suggestions():
         print("Showing suggestions")
         cursor_rows = app.get_DB_cursor()
-        query_rows = "SELECT * FROM suggestion"
+        query_rows = "SELECT * FROM forslag"
         cursor_rows.execute(query_rows);
-                
-        cursor_cols = app.get_DB_cursor()
-        query_cols = "SHOW COLUMNS FROM suggestion"
-        cursor_cols.execute(query_cols)
+
+        for row in cursor_rows:
+            print(row)
         
-        app.respond_JSON(result)
+        cursor_cols = app.get_DB_cursor()
+        query_cols = """
+SELECT 
+   table_name, 
+   column_name, 
+   data_type 
+FROM 
+   information_schema.columns
+WHERE 
+   table_name = 'forslag'
+"""
+        cursor_cols.execute(query_cols)
+
+        for col in cursor_cols:
+            print(col)
+        
         cursor_cols.close()
         cursor_rows.close()
 
