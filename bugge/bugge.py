@@ -185,7 +185,7 @@ class Bugge:
     ### Response handlers
     def respond_HTML(self, body, status=200):
         header = \
-        "content-type: text/html\n" + \
+        "content-type: text/html; charset=utf-8\n" + \
         "status: " + str(status) + "\n\n"
             
         response = header + body
@@ -206,7 +206,7 @@ class Bugge:
             return
         
         header = \
-        "content-type: text/json\n" + \
+        "content-type: text/json; charset=utf-8\n" + \
         "status: " + str(status) + "\n\n"
 
         response = header + body
