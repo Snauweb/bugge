@@ -211,11 +211,14 @@ class Bugge:
 
         response = header + body
         print(response)
+        
 
+    def respond_error(self, response_type, error_code, error_msg="Error"):
+        if(response_type == "HTML"):
+            self.respond_HTML("<h1>" +
+                              error_msg + " " + str(error_code) +
+                              "</h1>",
+                              status=error_code)
+        if(response_type == "JSON"):
+            self.respond_JSON({"errorMsg": error_msg}, status=error_code)
 
-    def respond_error(self, type, error_code):
-        if(type == "HTML"):
-            self.respond_HTML("<h1>Error " + str(error_code) + "</h1>", status=error_code)
-
-        if(type == "JSON"):
-            self.respond_JSON({"http-error": error_code}, status=error_code)
