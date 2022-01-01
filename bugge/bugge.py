@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 # The main purpose of this class is to abstract away the specific
 # database handler used
@@ -75,6 +76,7 @@ class Bugge:
         self.routes = {}
         self.DB = None # None indicates that no DB connection has been established
         self.url_params = {}
+        sys.stdout.reconfigure(encoding = "utf-8") # Encode all output as utf-8
 
     # Python has destructors!
     # Ensures the DB connection is not left open
@@ -127,9 +129,42 @@ class Bugge:
                 self.env["PATH_INFO"] = "/"
                 
             self.env["QUERY_STRING"] = os.environ["QUERY_STRING"]
-            self.env["REMOTE_USER"] = os.environ["REMOTE_USER"]
+
+            # Local GCI deploy with http.server does not supply the
+            # REMOTE_USER header, should have default
+            if "REMOTE_USER" in os.environ:
+                self.env["REMOTE_USER"] = os.environ["REMOTE_USER"]
+            else:
+                self.env["REMOTE_USER"] = "johanpålåfte"
+
             self.env["REQUEST_METHOD"] = os.environ["REQUEST_METHOD"]
 
+            # Read lenght of posted content
+            if(self.env["REQUEST_METHOD"] == "POST"):
+                self.env["CONTENT_LENGTH"] = os.environ["CONTENT_LENGTH"]
+
+    def read_payload(self):
+        self.payload = ""
+        # in debug mode, load mock payload from file
+        if(self.config_dict["debug"] == True):
+            from payload import payload
+            self.payload = payload
+        else:
+            # Read CONTENT_LENGTH number of bytes from stdin
+            self.payload = sys.stdin.read(int(self.env["CONTENT_LENGTH"]))
+            
+
+    ### Input processing
+    def parse_payload_json(self):
+        if(self.payload == None):
+            raise Exception("Payload not read, call read_payload before any payload-using methods")
+        try:
+            parsed_payload = json.loads(self.payload)
+        except Exception:
+            parsed_payload = None
+        finally:
+            return parsed_payload
+            
     def get_config(self):
         if(self.config_dict is None):
             raise Exception("Config is not loaded")
@@ -187,7 +222,7 @@ class Bugge:
         header = \
         "content-type: text/html; charset=utf-8\n" + \
         "status: " + str(status) + "\n\n"
-            
+        
         response = header + body
         print(response)
 
@@ -204,14 +239,17 @@ class Bugge:
         else:
             respond_error("JSON", 500)
             return
+
+
         
         header = \
-        "content-type: text/json; charset=utf-8\n" + \
-        "status: " + str(status) + "\n\n"
+        "content-type: text/html; charset=utf-8\n" + \
+        "status: " + str(status) + "\n" +\
+        "charset: utf-8" + "\n\n"
 
         response = header + body
         print(response)
-        
+
 
     def respond_error(self, response_type, error_code, error_msg="Error"):
         if(response_type == "HTML"):
@@ -221,4 +259,3 @@ class Bugge:
                               status=error_code)
         if(response_type == "JSON"):
             self.respond_JSON({"errorMsg": error_msg}, status=error_code)
-
